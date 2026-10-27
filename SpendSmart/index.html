@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpendSmart - Smart Personal Expense Tracker</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <!-- Font Awesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <div class="app-container">
+    <!-- Header Section -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-wallet"></i>
+        </div>
+        <div class="brand-text">
+          <h1>Spend<span>Smart</span></h1>
+          <p>Track your spending, master your savings</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <!-- Theme Toggle Button -->
+        <button id="themeToggleBtn" class="theme-toggle-btn" title="Toggle Light/Dark Mode" aria-label="Toggle theme">
+          <i class="fa-solid fa-moon" id="themeIcon"></i>
+          <span id="themeText">Dark Mode</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Dashboard Grid -->
+    <main class="dashboard-grid">
+
+      <!-- Top Summary Cards -->
+      <section class="summary-cards">
+        <div class="card stat-card total-card">
+          <div class="stat-icon">
+            <i class="fa-solid fa-indian-rupee-sign"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Total Expenses</span>
+            <h2 class="stat-value" id="totalExpenseDisplay">₹0</h2>
+          </div>
+        </div>
+
+        <div class="card stat-card month-card">
+          <div class="stat-icon">
+            <i class="fa-solid fa-calendar-check"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label" id="currentMonthLabel">This Month</span>
+            <h2 class="stat-value" id="monthExpenseDisplay">₹0</h2>
+          </div>
+        </div>
+
+        <div class="card stat-card count-card">
+          <div class="stat-icon">
+            <i class="fa-solid fa-receipt"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Total Transactions</span>
+            <h2 class="stat-value" id="totalCountDisplay">0</h2>
+          </div>
+        </div>
+
+        <div class="card stat-card top-category-card">
+          <div class="stat-icon">
+            <i class="fa-solid fa-chart-pie"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Top Category</span>
+            <h2 class="stat-value" id="topCategoryDisplay">None</h2>
+          </div>
+        </div>
+      </section>
+
+      <!-- Center Content: Add Expense & Monthly Summary -->
+      <div class="content-row">
+        <!-- Add Expense Form Card -->
+        <section class="card form-card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-circle-plus"></i> Add New Expense</h3>
+            <span class="badge">Quick Entry</span>
+          </div>
+
+          <form id="expenseForm" class="expense-form" novalidate>
+            <!-- Title Input -->
+            <div class="form-group">
+              <label for="expenseTitle">Expense Description</label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-pen input-icon"></i>
+                <input type="text" id="expenseTitle" placeholder="e.g. Grocery shopping, Electricity bill" required
+                  maxlength="50" autocomplete="off" />
+              </div>
+            </div>
+
+            <!-- Amount & Date (2 columns) -->
+            <div class="form-row">
+              <div class="form-group">
+                <label for="expenseAmount">Amount (₹)</label>
+                <div class="input-wrapper">
+                  <i class="fa-solid fa-indian-rupee-sign input-icon"></i>
+                  <input type="number" id="expenseAmount" placeholder="e.g. 750" min="1" step="any" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="expenseDate">Date</label>
+                <div class="input-wrapper">
+                  <i class="fa-solid fa-calendar-day input-icon"></i>
+                  <input type="date" id="expenseDate" required />
+                </div>
+              </div>
+            </div>
+
+            <!-- Category Input -->
+            <div class="form-group">
+              <label for="expenseCategory">Category</label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-tags input-icon"></i>
+                <select id="expenseCategory" required>
+                  <option value="" disabled selected>Select a category</option>
+                  <option value="Food & Dining">🍔 Food & Dining</option>
+                  <option value="Groceries">🛒 Groceries</option>
+                  <option value="Transportation">🚗 Transportation</option>
+                  <option value="Shopping">🛍️ Shopping</option>
+                  <option value="Bills & Utilities">💡 Bills & Utilities</option>
+                  <option value="Entertainment">🎬 Entertainment</option>
+                  <option value="Health & Medical">💊 Health & Medical</option>
+                  <option value="Education">📚 Education</option>
+                  <option value="Travel">✈️ Travel</option>
+                  <option value="Other">📦 Other</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary" id="addExpenseBtn">
+              <i class="fa-solid fa-plus"></i> Add Expense
+            </button>
+          </form>
+        </section>
+
+        <!-- Category Chart Card -->
+        <section class="card chart-card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-chart-donut"></i> Category Breakdown</h3>
+            <span class="badge" id="chartTotalBadge">₹0 Total</span>
+          </div>
+          <div class="chart-container" id="chartContainer">
+            <canvas id="categoryChart"></canvas>
+            <div class="chart-empty-state" id="chartEmptyState">
+              <i class="fa-solid fa-chart-pie"></i>
+              <p>No expense data yet</p>
+              <span>Add your first expense to see the visual breakdown</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Monthly Summary & Filter Row -->
+      <section class="card monthly-summary-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <h3><i class="fa-solid fa-calendar-days"></i> Monthly Spending Summary</h3>
+            <p class="subtitle">Overview of your spending month by month</p>
+          </div>
+          <!-- Month filter select -->
+          <div class="month-filter-wrapper">
+            <label for="monthFilter"><i class="fa-solid fa-filter"></i> Select Month:</label>
+            <select id="monthFilter">
+              <option value="ALL">All Months</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Monthly breakdown bar grid -->
+        <div class="monthly-breakdown-grid" id="monthlyBreakdownGrid">
+          <!-- Dynamically inserted monthly summary cards -->
+        </div>
+      </section>
+
+      <!-- Transactions List Card -->
+      <section class="card transactions-card">
+        <div class="transactions-header">
+          <div class="header-title-group">
+            <h3><i class="fa-solid fa-list-check"></i> Recent Transactions</h3>
+            <p class="subtitle">View, search, filter and manage all your entries</p>
+          </div>
+
+          <!-- Controls: Search and Filter -->
+          <div class="transaction-controls">
+            <!-- Search input -->
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="searchTransactions" placeholder="Search description..."
+                aria-label="Search transactions" />
+            </div>
+
+            <!-- Category Filter -->
+            <div class="filter-box">
+              <i class="fa-solid fa-filter"></i>
+              <select id="categoryFilter" aria-label="Filter by category">
+                <option value="ALL">All Categories</option>
+                <option value="Food & Dining">Food & Dining</option>
+                <option value="Groceries">Groceries</option>
+                <option value="Transportation">Transportation</option>
+                <option value="Shopping">Shopping</option>
+                <option value="Bills & Utilities">Bills & Utilities</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Health & Medical">Health & Medical</option>
+                <option value="Education">Education</option>
+                <option value="Travel">Travel</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <!-- Clear All Data button -->
+            <button id="clearAllBtn" class="btn btn-outline-danger" title="Clear All Expenses">
+              <i class="fa-solid fa-trash-can"></i> Clear All
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter info pill / stats -->
+        <div class="filter-status-bar" id="filterStatusBar">
+          <span id="filterStatusText">Showing all transactions</span>
+          <button id="resetFiltersBtn" class="btn-text-link">Reset Filters</button>
+        </div>
+
+        <!-- Transaction List Table / Cards -->
+        <div class="table-responsive">
+          <table class="transaction-table" id="transactionTable">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Amount</th>
+                <th class="text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="transactionList">
+              <!-- Dynamically rendered rows -->
+            </tbody>
+          </table>
+
+          <!-- Empty State -->
+          <div class="empty-state" id="emptyState">
+            <div class="empty-icon">
+              <i class="fa-solid fa-receipt"></i>
+            </div>
+            <h4>No Transactions Found</h4>
+            <p>You haven't added any expenses yet or no transactions match your active filters.</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>SpendSmart &copy; <span id="currentYear"></span>. Built with HTML, CSS & JavaScript.</p>
+      <p class="footer-note">All your expense data is safely stored in your browser's Local Storage.</p>
+    </footer>
+  </div>
+
+  <!-- Toast Notification element -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- JavaScript file -->
+  <script src="script.js"></script>
+</body>
+
+</html>
